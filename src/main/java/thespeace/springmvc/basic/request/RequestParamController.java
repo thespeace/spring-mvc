@@ -4,9 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import thespeace.springmvc.HelloData;
 
 import java.io.IOException;
 import java.util.Map;
@@ -137,8 +139,43 @@ public class RequestParamController {
     @ResponseBody
     @RequestMapping("/request-param-map")
     public String requestParamMap(@RequestParam Map<String, Object> paramMap) {
-        log.info("username={}, age={}", paramMap.get("username"),
-                paramMap.get("age"));
+        log.info("username={}, age={}", paramMap.get("username"), paramMap.get("age"));
         return "ok";
     }
+
+    /**
+     * <h2>@ModelAttribute 사용</h2>
+     * 스프링MVC는 @ModelAttribute 가 있으면 다음을 실행
+     * <ul>
+     *     <li><code>HelloData</code> 객체를 생성한다.</li>
+     *     <li>요청 파라미터의 이름으로 <code>HelloData</code> 객체의 프로퍼티를 찾는다.
+     *     그리고 해당 프로퍼티의 <code>setter</code>를 호출해서 파라미터의 값을 입력(바인딩) 한다.</li>
+     *     <li>ex) 파라미터 이름이 <code>username</code> 이면 <code>setUsername()</code> 메서드를 찾아서 호출하면서 값을 입력한다</li>
+     * </ul>
+     * @see <a href="http://localhost:8080/model-attribute-v1?username=userA&age=20">test url</a>
+     */
+    @ResponseBody
+    @RequestMapping("/model-attribute-v1")
+    public String modelAttributeV1(@ModelAttribute HelloData helloData) {
+        log.info("username={}, age={}", helloData.getUsername(), helloData.getAge());
+        return "ok";
+    }
+
+    /**
+     * <h2>@ModelAttribute 생략 가능</h2>
+     * {@code @ModelAttribute}는 생략할 수 있다.
+     * 그런데 {@code @RequestParam} 도 생략할 수 있으니 혼란이 발생할 수 있다.
+     * <ul>스프링은 해당 생략시 다음과 같은 규칙을 적용한다.
+     *     <li>String , int , Integer 같은 단순 타입 = @RequestParam</li>
+     *     <li>나머지 = @ModelAttribute (argument resolver로 지정해둔 타입 외)</li>
+     * </ul>
+     * @see <a href="http://localhost:8080/model-attribute-v2?username=userA&age=20">test url</a>
+     */
+    @ResponseBody
+    @RequestMapping("/model-attribute-v2")
+    public String modelAttributeV2(HelloData helloData) {
+        log.info("username={}, age={}", helloData.getUsername(), helloData.getAge());
+        return "ok";
+    }
+
 }
